@@ -1,0 +1,38 @@
+name: Supabase keep-alive
+on:
+  schedule:
+    - cron: "0 8 */3 * *"   # tous les 3 jours à 8h UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      P1_URL: ${{ secrets.P1_URL }}
+      P1_KEY: ${{ secrets.P1_KEY }}
+      P1_TABLE: ${{ secrets.P1_TABLE }}
+      P2_URL: ${{ secrets.P2_URL }}
+      P2_KEY: ${{ secrets.P2_KEY }}
+      P2_TABLE: ${{ secrets.P2_TABLE }}
+      P3_URL: ${{ secrets.P3_URL }}
+      P3_KEY: ${{ secrets.P3_KEY }}
+      P3_TABLE: ${{ secrets.P3_TABLE }}
+      P4_URL: ${{ secrets.P4_URL }}
+      P4_KEY: ${{ secrets.P4_KEY }}
+      P4_TABLE: ${{ secrets.P4_TABLE }}
+      P5_URL: ${{ secrets.P5_URL }}
+      P5_KEY: ${{ secrets.P5_KEY }}
+      P5_TABLE: ${{ secrets.P5_TABLE }}
+    steps:
+      - name: Ping des 5 projets
+        run: |
+          fail=0
+          for i in 1 2 3 4 5; do
+            url="P${i}_URL"; key="P${i}_KEY"; table="P${i}_TABLE"
+            code=$(curl -s -o /dev/null -w "%{http_code}" \
+              "${!url}/rest/v1/${!table}?select=*&limit=1" \
+              -H "apikey: ${!key}" -H "Authorization: Bearer ${!key}")
+            echo "Projet $i -> HTTP $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
