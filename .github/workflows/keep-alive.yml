@@ -30,8 +30,9 @@ jobs:
           for i in 1 2 3 4 5; do
             url="P${i}_URL"; key="P${i}_KEY"; table="P${i}_TABLE"
             code=$(curl -s -o /dev/null -w "%{http_code}" \
+              --retry 3 --retry-delay 2 --retry-all-errors \
               "${!url}/rest/v1/${!table}?select=*&limit=1" \
-              -H "apikey: ${!key}" -H "Authorization: Bearer ${!key}")
+              -H "apikey: ${!key}" -H "Authorization: Bearer ${!key}" || true)
             echo "Projet $i -> HTTP $code"
             [ "$code" = "200" ] || fail=1
           done
