@@ -29,9 +29,16 @@ jobs:
           fail=0
           for i in 1 2 3 4 5; do
             url="P${i}_URL"; key="P${i}_KEY"; table="P${i}_TABLE"
-            code=$(curl -s -o /dev/null -w "%{http_code}" \
+            curl_exit=0
+            code=$(curl -sS -o /dev/null -w "%{http_code}" \
+              --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 \
               "${!url}/rest/v1/${!table}?select=*&limit=1" \
-              -H "apikey: ${!key}" -H "Authorization: Bearer ${!key}")
+              -H "apikey: ${!key}") || curl_exit=$?
+            if [ "$curl_exit" -ne 0 ]; then
+              echo "Projet $i -> curl error $curl_exit"
+              fail=1
+              continue
+            fi
             echo "Projet $i -> HTTP $code"
             [ "$code" = "200" ] || fail=1
           done
