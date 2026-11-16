@@ -27,7 +27,7 @@ jobs:
       - name: Ping des 5 projets
         run: |
           fail=0
-          for i in 1 4 5; do
+          for i in 1 3 4 5; do
             url="P${i}_URL"; key="P${i}_KEY"; table="P${i}_TABLE"
             case "${!url}" in
               https://*.supabase.co|https://*.supabase.co/) ;;
